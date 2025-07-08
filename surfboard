@@ -74,9 +74,9 @@ ruleset=🐟 漏网之鱼,[]FINAL
 ;设置分组标志位
 custom_proxy_group=🚀 国外流量`select`[]♻️ 自动选择`[]🔯 故障转移`[]🔮 负载均衡`[]🚀 手动选择1`[]🚀 手动选择2`[]🇸🇬 新加坡节点`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇺🇸 美国节点`[]🇰🇷 韩国节点
 custom_proxy_group=🚀 手动选择1`select`.*
-custom_proxy_group=♻️ 自动选择`url-test`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://i.ytimg.com/generate_204`180,,50
-custom_proxy_group=🔯 故障转移`fallback`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://i.ytimg.com/generate_204`300,,50
-custom_proxy_group=🔮 负载均衡`load-balance`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://i.ytimg.com/generate_204`300,,50
+custom_proxy_group=♻️ 自动选择`url-test`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://www.gstatic.com/generate_204`180,,50
+custom_proxy_group=🔯 故障转移`fallback`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://www.gstatic.com/generate_204`300,,50
+custom_proxy_group=🔮 负载均衡`load-balance`(^(?!.*(剩余流量|到期时间|过期时间|官网地址|产品名称|先购买套餐|流量消耗|唯一官网|更新订阅)).*)`https://www.gstatic.com/generate_204`300,,50
 custom_proxy_group=🚀 手动选择2`select`.*
 custom_proxy_group=🚀 免流`select`(中国|国内|CN|移动|联通|电信)
 custom_proxy_group=📹 YouTube`select`[]🚀 国外流量`[]🎯 国内流量`[]♻️ 自动选择`[]🇸🇬 新加坡节点`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇺🇸 美国节点`[]🇰🇷 韩国节点`[]🚀 手动选择1`[]🚀 手动选择2`[]🔯 故障转移`[]🔮 负载均衡
