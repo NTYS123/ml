@@ -2,7 +2,7 @@
 
 ;================================================
 ; 核心：钉钉定向全局免流至尊版 (Host: tms.dingtalk.com)
-; 状态：UI 顺序完美重排 (符合操作直觉)
+; 状态：按需定制版 (新增韩/美测速、手动2全覆盖、FCM独立)
 ; 逻辑：控制 -> 总闸 -> 媒体 -> 系统 -> 资源
 ;================================================
 
@@ -60,7 +60,7 @@ ruleset=🎯 国内流量,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/mast
 ruleset=🎯 国内流量,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaIp.list
 ruleset=🐟 漏网之鱼,[]FINAL
 
-; 5. 策略组构建 (完美排序版)
+; 5. 策略组构建
 ;------------------------------------------------
 
 ; 【第一层：最高权限控制】
@@ -69,17 +69,20 @@ custom_proxy_group=🚀 手动选择2`select`.*
 
 ; 【第二层：流量总闸口】
 custom_proxy_group=🎯 国内流量`select`[]🚀 国内免流`[]🚀 手动选择1`[]🚀 手动选择2`[]DIRECT
-custom_proxy_group=🚀 国外流量`select`[]🚀 国外免流`[]♻️ 自动测速`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点
+; 国外流量：加入国外免流、美国、韩国自动测速
+custom_proxy_group=🚀 国外流量`select`[]🚀 国外免流`[]♻️ 自动测速`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点`[]🇺🇸 美国节点`[]🇰🇷 韩国节点
 
 ; 【第三层：高频娱乐媒体】
 custom_proxy_group=📹 YouTube`select`[]🚀 国外免流`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点`[]🚀 手动选择1`[]🚀 手动选择2
 custom_proxy_group=🎥 Netflix`select`[]🎥 奈飞节点`[]🚀 国外免流`[]🚀 手动选择1`[]🚀 手动选择2
 custom_proxy_group=🎥 DisneyPlus`select`[]🚀 国外免流`[]🇺🇸 美国节点`[]🚀 手动选择1`[]🚀 手动选择2
 custom_proxy_group=🎶 TikTok`select`[]🚀 国外免流`[]🇸🇬 新加坡节点`[]🚀 手动选择1`[]🚀 手动选择2
+; Bilibili：加入手动2
 custom_proxy_group=📺 Bilibili`select`[]DIRECT`[]🚀 国内免流`[]🚀 手动选择2`[]🇭🇰 香港节点`[]🇹🇼 台湾节点
 custom_proxy_group=📺 巴哈姆特`select`[]🚀 国外免流`[]🇹🇼 台湾节点`[]🚀 手动选择1`[]🚀 手动选择2
 custom_proxy_group=🎬 国际影音`select`[]🚀 国外免流`[]🔯 故障切换`[]🚀 手动选择1`[]🚀 手动选择2
 custom_proxy_group=🎵 Spotify`select`[]🚀 国外免流`[]🇸🇬 新加坡节点`[]🚀 手动选择1`[]🚀 手动选择2
+; 网易云：加入手动2
 custom_proxy_group=☁️ 网易云音乐`select`[]🚀 国内免流`[]🚀 手动选择2`[]DIRECT
 
 ; 【第四层：社交与智能助手】
@@ -88,20 +91,25 @@ custom_proxy_group=🤖 Discord`select`[]🚀 国外免流`[]🚀 手动选择1`
 custom_proxy_group=🧚 AI助手`select`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点`[]🇺🇸 美国节点`[]🚀 国外免流`[]🚀 手动选择1`[]🚀 手动选择2
 
 ; 【第五层：系统、游戏与推送】
+; 谷歌FCM：独立分组
 custom_proxy_group=📢 谷歌FCM`select`[]🚀 国外免流`[]🚀 手动选择1`[]🔯 故障切换
 custom_proxy_group=📢 谷歌服务`select`[]🚀 国外免流`[]🚀 手动选择1`[]🚀 手动选择2
+; 苹果服务：加入手动2
 custom_proxy_group=🍎 苹果服务`select`[]🚀 国内免流`[]DIRECT`[]🚀 手动选择2`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点
+; 微软服务：加入手动2
 custom_proxy_group=Ⓜ️ 微软服务`select`[]🚀 国内免流`[]DIRECT`[]🚀 手动选择2`[]🇺🇸 美国节点
+; 游戏平台：加入手动2
 custom_proxy_group=🎮 游戏平台`select`[]DIRECT`[]🚀 国内免流`[]🚀 手动选择2`[]🇭🇰 香港节点`[]🇹🇼 台湾节点`[]🇯🇵 日本节点`[]🇸🇬 新加坡节点
 custom_proxy_group=🚫 小米系统限制`select`[]🚀 国内免流`[]REJECT
 
-; 【第六层：底层资源与工具 (不常动)】
+; 【第六层：底层资源与工具】
+; IP归属地：加入手动1、2
 custom_proxy_group=🚩 IP归属地`select`[]🚀 国内免流`[]🚀 国外免流`[]🚀 手动选择1`[]🚀 手动选择2`[]DIRECT
 custom_proxy_group=🛑 广告拦截`select`[]REJECT`[]DIRECT`[]🚀 国内免流
 custom_proxy_group=🍃 应用净化`select`[]REJECT`[]DIRECT`[]🚀 国内免流
 custom_proxy_group=🐟 漏网之鱼`select`[]🚀 国内免流`[]🚀 手动选择1`[]🚀 手动选择2`[]DIRECT
 
-; 【底层：自动测速与节点池 (UI折叠或底部)】
+; 【底层：自动测速与节点池】
 custom_proxy_group=🚀 国内免流`select`(中国|CN|移动|联通|电信|钉钉|免流|ML|Ding)
 custom_proxy_group=🚀 国外免流`select`(香港|日本|美国|新加坡|台湾|HK|JP|US|SG|TW)
 custom_proxy_group=🎥 奈飞节点`select`[]🚀 国外免流`(新加坡|台湾|香港|美国|SG|TW|HK|US)
@@ -110,6 +118,8 @@ custom_proxy_group=🇹🇼 台湾节点`url-test`(🇹🇼|台|TW|Taiwan)`http:
 custom_proxy_group=🇯🇵 日本节点`url-test`(🇯🇵|日本|JP|Japan)`http://www.gstatic.com/generate_204`600,100,true
 custom_proxy_group=🇸🇬 新加坡节点`url-test`(🇸🇬|新加坡|SG|Singapore)`http://www.gstatic.com/generate_204`600,100,true
 custom_proxy_group=🇺🇸 美国节点`url-test`(🇺🇸|美|US|United States)`http://www.gstatic.com/generate_204`600,100,true
+; 新增韩国节点测速定义
+custom_proxy_group=🇰🇷 韩国节点`url-test`(🇰🇷|韩国|KR|Korea|South Korea)`http://www.gstatic.com/generate_204`600,100,true
 custom_proxy_group=♻️ 自动测速`url-test`(^(?!.*(流量|时间|官网|提示)).*)`http://www.gstatic.com/generate_204`600,150,true
 custom_proxy_group=🔯 故障切换`fallback`(^(?!.*(流量|时间|官网|提示)).*)`http://www.gstatic.com/generate_204`600,,true
 
