@@ -2,10 +2,11 @@
 
 ;================================================
 ; 核心：钉钉定向全局免流 (Host: tms.dingtalk.com)
-; 修正：解决“应用净化 not found”报错，统一策略组命名
+; 修正：补全所有缺失分组，解决 Not Found 报错
+; 特性：保留原手动控制权，小米嗅探，QUIC 彻底封锁
 ;================================================
 
-; 1. 内核高级嗅探 (接管小米系统直连及所有隐匿流量)
+; 1. 内核高级嗅探 (接管小米系统直连及隐匿流量)
 ;------------------------------------------------
 sniffer:
   enable: true
@@ -14,7 +15,7 @@ sniffer:
     HTTP: {ports: [80, 8080-8888], override-destination: true}
   force-domain: ["+"]
 
-; 2. 协议封锁 (解决 QUIC 协议绕过免流的问题)
+; 2. 协议封锁 (强制降级 QUIC，解决免流失效)
 ;------------------------------------------------
 rules:
   - AND,((DEST-PORT,443),(PROTOCOL,UDP)),REJECT
@@ -31,21 +32,19 @@ dns_nameserver_policy={
   "geosite:gfw,geolocation-!cn": ["proxy"]
 }
 
-; 4. 规则集优先级排序 (确保 ruleset 与策略组 1:1 对应)
+; 4. 规则集优先级重排 (规则标签必须与下方策略组 1:1 对应)
 ;------------------------------------------------
-; 所有广告/净化规则统一指向 [🛑 广告拦截]
+; [顶级拦截]
 ruleset=🛑 广告拦截,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
-ruleset=🛑 广告拦截,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
-ruleset=🛑 广告拦截,https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Privacy/Privacy_Classical.yaml
-
-; 系统限制
+ruleset=🍃 应用净化,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list
 ruleset=🚫 小米系统限制,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Xiaomi.list
 
-; 社交与通信
+; [社交/通信]
 ruleset=📲 Telegram,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml
 ruleset=🤖 Discord,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Discord/Discord.yaml
 
-; 视频媒体
+; [媒体分组]
+ruleset=🧚 AI助手,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
 ruleset=📹 YouTube,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
 ruleset=🎥 Netflix,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml
 ruleset=🎥 DisneyPlus,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml
@@ -54,37 +53,44 @@ ruleset=📺 Bilibili,clash-classic:https://raw.githubusercontent.com/blackmatri
 ruleset=📺 巴哈姆特,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bahamut/Bahamut.yaml
 ruleset=🎬 国际影音,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia.yaml
 
-; 音乐与 AI
-ruleset=🧚 AI助手,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
+; [音乐平台独立分组]
 ruleset=🎵 Spotify,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml
 ruleset=☁️ 网易云音乐,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/NetEaseMusic/NetEaseMusic.yaml
 
-; 游戏与服务
+; [基础服务/游戏]
 ruleset=🎮 游戏平台,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/Game.yaml
 ruleset=🍎 苹果服务,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.yaml
 ruleset=Ⓜ️ 微软服务,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml
 ruleset=📢 谷歌服务,clash-classic:https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml
 ruleset=🚩 IP归属地,clash-classic:https://raw.githubusercontent.com/lwd-temp/anti-ip-attribution/main/generated/rule-provider.yaml
 
-; 基础分流
+; [通用分流兜底]
 ruleset=🚀 国外流量,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
 ruleset=🎯 国内流量,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list
 ruleset=🎯 国内流量,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaIp.list
 
 ruleset=🐟 漏网之鱼,[]FINAL
 
-; 5. 策略组构建
+; 5. 策略组构建 (每个 ruleset 的标签在这里必须有对应的组)
 ;------------------------------------------------
 
-; 【控制中心】
+; 【核心手动控制组】保持原习惯
 custom_proxy_group=🚀 手动选择1`select`.*
 custom_proxy_group=🚀 手动选择2`select`.*
 
-; 【核心分流入口】
-custom_proxy_group=🚀 国外流量`select`[]♻️ 自动测速`[]🚀 国外免流`[]🚀 手动选择1`[]🚀 手动选择2`[]🔯 故障切换
+; 【分流总闸】
 custom_proxy_group=🎯 国内流量`select`[]🚀 国内免流`[]🚀 手动选择1`[]DIRECT
+custom_proxy_group=🚀 国外流量`select`[]♻️ 自动测速`[]🚀 国外免流`[]🚀 手动选择2
 
-; 【视频媒体组】
+; 【针对报错补全：广告与净化】
+custom_proxy_group=🛑 广告拦截`select`[]REJECT`[]DIRECT`[]🚀 国内免流
+custom_proxy_group=🍃 应用净化`select`[]REJECT`[]DIRECT`[]🚀 国内免流
+
+; 【系统级限制】
+custom_proxy_group=🚫 小米系统限制`select`[]🚀 国内免流`[]REJECT`[]DIRECT
+
+; 【媒体 App 细分】
+custom_proxy_group=🧚 AI助手`select`[]🇺🇸 美国节点`[]🇸🇬 新加坡节点`[]🚀 国外免流
 custom_proxy_group=📹 YouTube`select`[]🚀 国外免流`[]🇺🇸 美国节点`[]🚀 手动选择2
 custom_proxy_group=🎥 Netflix`select`[]🎥 奈飞节点`[]🚀 国外免流`[]🚀 手动选择2
 custom_proxy_group=🎥 DisneyPlus`select`[]🚀 国外免流`[]🇺🇸 美国节点`[]🚀 手动选择2
@@ -92,24 +98,24 @@ custom_proxy_group=🎶 TikTok`select`[]🚀 国外免流`[]🇸🇬 新加坡�
 custom_proxy_group=📺 Bilibili`select`[]DIRECT`[]🚀 国内免流`[]🇭🇰 香港节点
 custom_proxy_group=📺 巴哈姆特`select`[]🚀 国外免流`[]🇹🇼 台湾节点`[]🚀 手动选择2
 custom_proxy_group=🎬 国际影音`select`[]🚀 国外免流`[]🔯 故障切换`[]🚀 手动选择2
-
-; 【社交与音乐】
 custom_proxy_group=📲 Telegram`select`[]🚀 国外免流`[]♻️ 自动测速`[]🚀 手动选择2
 custom_proxy_group=🤖 Discord`select`[]🚀 国外免流`[]🚀 手动选择2
+
+; 【音乐平台独立化】
 custom_proxy_group=🎵 Spotify`select`[]🚀 国外免流`[]🇸🇬 新加坡节点`[]🚀 手动选择2
 custom_proxy_group=☁️ 网易云音乐`select`[]🚀 国内免流`[]DIRECT
 
-; 【系统与功能】
-custom_proxy_group=🧚 AI助手`select`[]🇺🇸 美国节点`[]🇸🇬 新加坡节点`[]🚀 国外免流
-custom_proxy_group=🚫 小米系统限制`select`[]🚀 国内免流`[]REJECT
-custom_proxy_group=🍎 苹果服务`select`[]🚀 国内免流`[]DIRECT
-custom_proxy_group=Ⓜ️ 微软服务`select`[]🚀 国内免流`[]DIRECT
+; 【系统服务与游戏】
+custom_proxy_group=🍎 苹果服务`select`[]🚀 国内免流`[]DIRECT`[]🚀 国外流量
+custom_proxy_group=Ⓜ️ 微软服务`select`[]🚀 国内免流`[]DIRECT`[]🚀 国外流量
 custom_proxy_group=📢 谷歌服务`select`[]🚀 国外免流`[]🚀 手动选择2
 custom_proxy_group=🎮 游戏平台`select`[]DIRECT`[]🚀 国内免流`[]🚀 手动选择1
 
-; 【节点分类与测速】
+; 【核心：免流节点池】
 custom_proxy_group=🚀 国内免流`select`(中国|CN|移动|联通|电信|钉钉|免流|ML|Ding)
 custom_proxy_group=🚀 国外免流`select`(香港|日本|美国|新加坡|台湾|HK|JP|US|SG|TW)
+
+; 【测速与功能分组】
 custom_proxy_group=♻️ 自动测速`url-test`(^(?!.*(流量|时间|官网|提示)).*)`https://www.gstatic.com/generate_204`180,,50
 custom_proxy_group=🔯 故障切换`fallback`(^(?!.*(流量|时间|官网|提示)).*)`https://www.gstatic.com/generate_204`300,,50
 custom_proxy_group=🇭🇰 香港节点`url-test`(🇭🇰|港|HK|Hong Kong)`https://www.gstatic.com/generate_204`300,,50
@@ -117,10 +123,9 @@ custom_proxy_group=🇺🇸 美国节点`url-test`(🇺🇸|美|US|United States
 custom_proxy_group=🇸🇬 新加坡节点`url-test`(🇸🇬|新加坡|SG|Singapore)`https://www.gstatic.com/generate_204`300,,50
 custom_proxy_group=🇹🇼 台湾节点`url-test`(🇹🇼|台|TW|Taiwan)`https://www.gstatic.com/generate_204`300,,50
 custom_proxy_group=🎥 奈飞节点`select`(新加坡|台湾|香港|美国|SG|TW|HK|US)
-
-; 【通用辅助】
 custom_proxy_group=🚩 IP归属地`select`[]🚀 国内免流`[]🚀 国外免流`[]DIRECT
-custom_proxy_group=🛑 广告拦截`select`[]REJECT`[]DIRECT
+
+; 【兜底：鱼群锁死】
 custom_proxy_group=🐟 漏网之鱼`select`[]🚀 国内免流`[]🚀 手动选择1`[]🚀 国外免流`[]DIRECT
 
 enable_rule_generator=true
