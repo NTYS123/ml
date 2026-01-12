@@ -1,141 +1,230 @@
 {
+  "outbound_providers": [
+    {
+      "tag": "subscription",
+      "type": "remote",
+      "url": "此处替换为你的机场订阅链接(必需是Sing-box格式或由于转换器转换)",
+      "download_ua": "clash.meta",
+      "download_interval": "60m",
+      "path": "./subscription.db"
+    }
+  ],
   "log": {
-    "disabled": false,
     "level": "info",
     "timestamp": true
   },
-  
-  "experimental": {
-    "clash_api": {
-      "external_controller": "0.0.0.0:9095",
-      "external_ui": "/etc/sing-box/ui",
-      "secret": "",
-      "external_ui_download_url": "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip",
-      "external_ui_download_detour": "🚀 节点选择",
-      "default_mode": "rule"
-    },
-  "cache_file": {
-    "enabled": true,
-    "path": "/etc/sing-box/cache.db",
-    "store_fakeip": false
-    }
+  "dns": {
+    "servers": [
+      { "tag": "dns-ali", "address": "223.5.5.5", "detour": "DIRECT" },
+      { "tag": "dns-google", "address": "https://dns.google/dns-query", "detour": "🌌 国外免流" },
+      { "tag": "dns-block", "address": "rcode://success" }
+    ],
+    "rules": [
+      { "outbound": "any", "server": "dns-ali" },
+      { "rule_set": ["geosite-cn", "geosite-category-ads-all"], "server": "dns-ali" },
+      { "rule_set": ["geosite-geolocation-!cn"], "server": "dns-google" }
+    ],
+    "final": "dns-google",
+    "strategy": "ipv4_only",
+    "fakeip": { "enabled": true, "inet4_range": "198.18.0.0/15" }
   },
-
- "dns": 
- {
-   "servers": 
-   [
-     {"tag": "dns_direct", "address": "223.5.5.5", "address_strategy": "ipv4_only", "strategy": "ipv4_only", "detour": "🎯 全球直连"},
-     {"tag": "dns_proxy", "address": "tls://8.8.8.8", "address_strategy": "ipv4_only", "strategy": "ipv4_only", "detour": "🚀 节点选择"}
-   ],
-   "rules": 
-   [
-     {"outbound": "any", "server": "dns_direct", "disable_cache": true},
-     {"clash_mode": "Direct", "server": "dns_direct"},
-     {"clash_mode": "Global", "server": "dns_proxy"},
-     {"rule_set": "geosite-cn", "action": "route","server": "dns_direct"},
-     {"rule_set": "geosite-geolocation-!cn", "server": "dns_proxy"}
-   ],
-   "final": "dns_proxy",
-   "strategy": "ipv4_only"
-},
-
-"inbounds": [
-  {
-    "type": "tun",
-    "address": "172.19.0.1/30",
-    "mtu": 9000,
-    "auto_route": true,
-    "auto_redirect": true,
-    "strict_route": true,
-    "stack": "system",
-    "platform": {
-      "http_proxy": {
-        "enabled": true,
-        "server": "127.0.0.1",
-        "server_port": 2080
-      }
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun0",
+      "inet4_address": "172.19.0.1/30",
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "system",
+      "sniff": true,
+      "sniff_override_destination": true
     }
-  },
-  {
-    "type": "mixed",
-    "listen": "127.0.0.1",
-    "listen_port": 2080,
-    "sniff": true,
-    "users": []
-  }
-],
-
-  "outbounds": [
-    { "tag": "🚀 节点选择", "type": "selector", "outbounds": ["🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换", "♻️ 自动选择", "🎯 全球直连"] },
-    { "tag": "📹 YouTube", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🤖 OpenAI", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🍀 Google", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "👨‍💻 Github", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🪟 Microsoft", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🎯 全球直连"] },
-    { "tag": "🐬 OneDrive", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🎵 TikTok", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🎥 Netflix", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "📲 Telegram", "type": "selector", "outbounds": ["🚀 节点选择", "♻️ 自动选择", "🔯 香港自动", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点", "🐸 手动切换"] },
-    { "tag": "🍏 Apple", "type": "selector", "outbounds": ["🎯 全球直连", "🇭🇰 香港节点", "🇯🇵 日本节点", "🇺🇲 美国节点"] },
-    { "tag": "🐠 漏网之鱼", "type": "selector", "outbounds": ["🚀 节点选择","🎯 全球直连"] },
-    { "tag": "🐸 手动切换", "type": "selector", "outbounds": ["{all}"]},
-    { "tag": "🇭🇰 香港节点", "type": "selector", "outbounds": ["{all}"], "filter": [{ "action": "include", "keywords": ["🇭🇰|HK|hk|香港|港|HongKong"] }] },
-    { "tag": "🇯🇵 日本节点", "type": "selector", "outbounds": ["{all}"], "filter": [{ "action": "include", "keywords": ["🇯🇵|JP|jp|日本|日|Japan"] }] },
-    { "tag": "🇺🇲 美国节点", "type": "selector", "outbounds": ["{all}"], "filter": [{ "action": "include", "keywords": ["🇺🇸|US|us|美国|美|United States"] }, { "action": "exclude", "keywords": ["香港|港|HK|hk|HongKong"] }] },
-    { "tag": "🔯 香港自动", "type": "urltest", "outbounds": ["{all}"], "filter": [{ "action": "include", "keywords": ["🇭🇰|HK|hk|香港|港|HongKong"] }], "url": "http://www.gstatic.com/generate_204", "interval": "10m", "tolerance": 50 },
-    { "tag": "♻️ 自动选择", "type": "urltest", "outbounds": ["{all}"], "filter": [{ "action": "exclude", "keywords": ["网站|地址|剩余|过期|时间|有效"] }], "url": "http://www.gstatic.com/generate_204", "interval": "10m", "tolerance": 50 },
-    { "tag": "GLOBAL", "type": "selector", "outbounds": ["{all}"]},
-    { "tag": "🎯 全球直连", "type": "direct" }
   ],
-  
-  "route": 
- {
-   "auto_detect_interface": true,
-   "final": "🐠 漏网之鱼",
-   "rules": 
-   [
-     {"action": "sniff"},
-     {"protocol": "dns", "action": "hijack-dns"},
-     {"clash_mode": "direct", "outbound": "🎯 全球直连"},
-     {"clash_mode": "global", "outbound": "GLOBAL"},
-     {"domain": ["clash.razord.top", "yacd.metacubex.one", "yacd.haishan.me", "d.metacubex.one"], "outbound": "🎯 全球直连"},
-     {"rule_set": "geosite-private", "outbound": "🎯 全球直连"},
-     {"rule_set": "geosite-chat", "outbound": "🤖 OpenAI"},
-     {"rule_set": "geosite-youtube", "outbound": "📹 YouTube"},
-     {"rule_set": "geosite-github", "outbound": "👨‍💻 Github"},
-     {"rule_set": ["geosite-google", "geoip-google"], "outbound": "🍀 Google"},
-     {"rule_set": ["geosite-telegram", "geoip-telegram"], "outbound": "📲 Telegram"},
-     {"rule_set": "geosite-tiktok", "outbound": "🎵 TikTok"},
-     {"rule_set": ["geosite-netflix", "geoip-netflix"], "outbound": "🎥 Netflix"},
-     {"rule_set": ["geosite-apple", "geoip-apple"], "outbound": "🍏 Apple"},
-     {"rule_set": "geosite-onedrive", "outbound": "🐬 OneDrive"},
-     {"rule_set": "geosite-microsoft", "outbound": "🪟 Microsoft"},
-     {"rule_set": "geosite-geolocation-!cn", "outbound": "🚀 节点选择"},
-     {"rule_set": ["geoip-cn", "geosite-cn"], "outbound": "🎯 全球直连"}
-   ],
+  "route": {
+    "rules": [
+      { "protocol": "dns", "outbound": "dns-out" },
+      { "ip_is_private": true, "outbound": "DIRECT" },
+      { "rule_set": "geosite-category-ads-all", "outbound": "🛑 广告拦截" },
+      { "rule_set": "ban-program-ad", "outbound": "🍃 应用净化" },
+      { "rule_set": "xiaomi", "outbound": "🚫 小米系统限制" },
+      { "rule_set": "google-fcm", "outbound": "🔔 谷歌FCM" },
+      { "rule_set": "openai", "outbound": "✨ AI助手" },
+      { "rule_set": "youtube", "outbound": "📹 YouTube" },
+      { "rule_set": "netflix", "outbound": "🎥 Netflix" },
+      { "rule_set": "disney", "outbound": "🐭 DisneyPlus" },
+      { "rule_set": "tiktok", "outbound": "🎵 TikTok" },
+      { "rule_set": "bilibili", "outbound": "📺 Bilibili" },
+      { "rule_set": "bahamut", "outbound": "🐉 巴哈姆特" },
+      { "rule_set": "global-media", "outbound": "🎬 国际影音" },
+      { "rule_set": "telegram", "outbound": "✈️ Telegram" },
+      { "rule_set": "discord", "outbound": "👾 Discord" },
+      { "rule_set": "spotify", "outbound": "🎧 Spotify" },
+      { "rule_set": "netease", "outbound": "☁️ 网易云音乐" },
+      { "rule_set": "games", "outbound": "🎮 游戏平台" },
+      { "rule_set": "apple", "outbound": "🍎 苹果服务" },
+      { "rule_set": "microsoft", "outbound": "🪟 微软服务" },
+      { "rule_set": "google", "outbound": "🇬 谷歌服务" },
+      { "rule_set": "cn", "outbound": "🇨🇳 国内流量" },
+      { "rule_set": "geolocation-!cn", "outbound": "🌍 国外流量" }
+    ],
+    "rule_set": [
+      { "tag": "geosite-cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs" },
+      { "tag": "geosite-geolocation-!cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs" },
+      { "tag": "geosite-category-ads-all", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs" },
+      { "tag": "google-fcm", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/googlefcm.srs" },
+      { "tag": "ban-program-ad", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list", "download_detour": "🌌 国外免流" },
+      { "tag": "xiaomi", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/xiaomi.srs" },
+      { "tag": "openai", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/openai.srs" },
+      { "tag": "youtube", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/youtube.srs" },
+      { "tag": "netflix", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs" },
+      { "tag": "disney", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/disney.srs" },
+      { "tag": "tiktok", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/tiktok.srs" },
+      { "tag": "bilibili", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/bilibili.srs" },
+      { "tag": "bahamut", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/bahamut.srs" },
+      { "tag": "global-media", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/global.srs" },
+      { "tag": "telegram", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/telegram.srs" },
+      { "tag": "discord", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/discord.srs" },
+      { "tag": "spotify", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/spotify.srs" },
+      { "tag": "netease", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netease.srs" },
+      { "tag": "games", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/category-games.srs" },
+      { "tag": "apple", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/apple.srs" },
+      { "tag": "microsoft", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/microsoft.srs" },
+      { "tag": "google", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/google.srs" },
+      { "tag": "cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs" },
+      { "tag": "geolocation-!cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs" }
+    ],
+    "final": "🐟 漏网之鱼",
+    "auto_detect_interface": true
+  },
+  "outbounds": [
+    { "tag": "🕹️ 手动选择1", "type": "selector", "providers": ["subscription"], "includes": [".*"] },
+    { "tag": "🖱️ 手动选择2", "type": "selector", "providers": ["subscription"], "includes": [".*"] },
     
-   "rule_set": [
-    { "tag": "geosite-chat", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/category-ai-chat-!cn.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-youtube", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/youtube.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-google", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/google.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-github", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/github.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-telegram", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/telegram.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-tiktok", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/tiktok.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-netflix", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-apple", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/apple.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-microsoft", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/microsoft.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-onedrive", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/onedrive.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-geolocation-!cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/geolocation-!cn.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geosite-private", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/private.srs", "download_detour": "🚀 节点选择" },
-          
-    { "tag": "geoip-google", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/google.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geoip-telegram", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/telegram.srs", "download_detour": "🚀 节点选择" },     
-    { "tag": "geoip-netflix", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/netflix.srs", "download_detour": "🚀 节点选择" },     
-    { "tag": "geoip-apple", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo-lite/geoip/apple.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geoip-cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs", "download_detour": "🚀 节点选择" },
-    { "tag": "geoip-private", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/private.srs", "download_detour": "🚀 节点选择" }
+    { "tag": "🇨🇳 国内流量", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🌍 国外流量", "type": "selector", "outbounds": ["🌌 国外免流", "🔯 故障切换"] },
+    
+    { "tag": "🏮 国内免流", "type": "selector", "outbounds": ["♻️ 国内自动", "🧧 国内手动"] },
+    { "tag": "🌌 国外免流", "type": "selector", "outbounds": ["♻️ 自动优选", "🗺️ 国外手动", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动"] },
+
+    { "tag": "🎵 TikTok", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "📺 Bilibili", "type": "selector", "outbounds": ["DIRECT", "🏮 国内免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🐉 巴哈姆特", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🎧 Spotify", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "☁️ 网易云音乐", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "📹 YouTube", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🎥 Netflix", "type": "selector", "outbounds": ["🎥 奈飞节点", "🌌 国外免流", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🎥 奈飞节点", "type": "selector", "outbounds": ["🗺️ 国外手动"] },
+    { "tag": "🐭 DisneyPlus", "type": "selector", "outbounds": ["🌌 国外免流", "🇺🇸 美国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🎬 国际影音", "type": "selector", "outbounds": ["🌌 国外免流", "🔯 故障切换", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "👾 Discord", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "✨ AI助手", "type": "selector", "outbounds": ["🌌 国外免流", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "✈️ Telegram", "type": "selector", "outbounds": ["🌌 国外免流", "♻️ 自动优选", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🔔 谷歌FCM", "type": "selector", "outbounds": ["🌌 国外免流", "🔯 故障切换", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🇬 谷歌服务", "type": "selector", "outbounds": ["🌌 国外免流", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇰🇷 韩国自动", "🇺🇸 美国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🍎 苹果服务", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🪟 微软服务", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🎮 游戏平台", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT", "🇭🇰 香港自动", "🇹🇼 台湾自动", "🇯🇵 日本自动", "🇸🇬 新加坡自动", "🇺🇸 美国自动", "🇰🇷 韩国自动", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🚫 小米系统限制", "type": "selector", "outbounds": ["🏮 国内免流", "block"] },
+    { "tag": "📍 IP归属地", "type": "selector", "outbounds": ["🏮 国内免流", "🌌 国外免流", "DIRECT", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+    { "tag": "🛑 广告拦截", "type": "selector", "outbounds": ["block", "DIRECT", "🏮 国内免流"] },
+    { "tag": "🍃 应用净化", "type": "selector", "outbounds": ["block", "DIRECT", "🏮 国内免流"] },
+    { "tag": "🐟 漏网之鱼", "type": "selector", "outbounds": ["🏮 国内免流", "🌌 国外免流", "DIRECT", "🕹️ 手动选择1", "🖱️ 手动选择2"] },
+
+    {
+      "tag": "♻️ 自动优选",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "excludes": ["中国", "CN", "China", "国内", "移动", "联通", "电信", "钉钉", "免流", "ML", "Ding", "流量", "时间", "官网", "提示"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 150
+    },
+    {
+      "tag": "🔯 故障切换",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "excludes": ["中国", "CN", "China", "国内", "移动", "联通", "电信", "钉钉", "免流", "ML", "Ding", "流量", "时间", "官网", "提示"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m"
+    },
+    {
+      "tag": "♻️ 国内自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["中国", "CN", "移动", "联通", "电信", "钉钉", "免流", "ML", "Ding"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇭🇰 香港自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇭🇰", "港", "HK", "Hong Kong"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇹🇼 台湾自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇹🇼", "台", "TW", "Taiwan"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇯🇵 日本自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇯🇵", "日本", "JP", "Japan"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇸🇬 新加坡自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇸🇬", "新加坡", "SG", "Singapore"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇺🇸 美国自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇺🇸", "美", "US", "United States"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🇰🇷 韩国自动",
+      "type": "urltest",
+      "providers": ["subscription"],
+      "includes": ["🇰🇷", "韩国", "KR", "Korea", "South Korea"],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "10m",
+      "tolerance": 100
+    },
+    {
+      "tag": "🧧 国内手动",
+      "type": "selector",
+      "providers": ["subscription"],
+      "includes": ["中国", "CN", "移动", "联通", "电信", "钉钉", "免流", "ML", "Ding"]
+    },
+    {
+      "tag": "🗺️ 国外手动",
+      "type": "selector",
+      "providers": ["subscription"],
+      "includes": ["香港", "日本", "美国", "新加坡", "台湾", "HK", "JP", "US", "SG", "TW"]
+    },
+    { "tag": "DIRECT", "type": "direct" },
+    { "tag": "block", "type": "block" },
+    { "tag": "dns-out", "type": "dns" }
   ]
-}
 }
