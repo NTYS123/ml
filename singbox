@@ -2,22 +2,36 @@
   "dns": {
     "servers": [
       { "tag": "dns_proxy", "address": "https://1.1.1.1/dns-query", "detour": "🚀 机场流量" },
-      { "tag": "dns_direct", "address": "223.5.5.5", "detour": "direct" }
+      { "tag": "dns_direct", "address": "223.5.5.5", "detour": "direct" },
+      { "tag": "dns_fakeip", "address": "fakeip" }
     ],
     "rules": [
       { "outbound": "any", "server": "dns_direct" },
-      { "geosite": ["cn", "alibaba", "dingtalk"], "server": "dns_direct" }
+      { "geosite": ["cn", "alibaba", "dingtalk"], "server": "dns_direct" },
+      { "query_type": [ "A", "AAAA" ], "server": "dns_fakeip" }
     ],
-    "strategy": "ipv4_only"
+    "fakeip": { "enabled": true, "inet4_range": "198.18.0.0/15" }
   },
+  "inbounds": [
+    {
+      "type": "tun",
+      "inet4_address": "172.19.0.1/30",
+      "auto_route": true,
+      "strict_route": true,
+      "sniff": true
+    }
+  ],
   "outbounds": [
     {
       "type": "selector",
       "tag": "🚀 机场流量",
-      "outbounds": ["direct"], 
-      "providers": [ "airport-provider" ]
+      "outbounds": [
+        "airport-provider", 
+        "direct"
+      ]
     },
     { "type": "selector", "tag": "✨ AI助手", "outbounds": ["🚀 机场流量", "direct"] },
+    { "type": "selector", "tag": "📹 YouTube", "outbounds": ["🚀 机场流量", "direct"] },
     { "type": "direct", "tag": "direct" },
     { "type": "dns", "tag": "dns-out" },
     { "type": "block", "tag": "block" }
@@ -28,7 +42,8 @@
       "type": "remote",
       "download_url": "https://你的订阅转换链接&host=tms.dingtalk.com&sni=tms.dingtalk.com",
       "path": "./airport.json",
-      "download_interval": "24h"
+      "download_interval": "24h",
+      "health_check": { "enabled": true, "url": "http://www.gstatic.com/generate_204", "interval": "10m" }
     }
   ],
   "route": {
@@ -36,7 +51,9 @@
     "rules": [
       { "protocol": "dns", "outbound": "dns-out" },
       { "geosite": "openai", "outbound": "✨ AI助手" },
-      { "geosite": "cn", "outbound": "direct" }
+      { "geosite": "youtube", "outbound": "📹 YouTube" },
+      { "geosite": "cn", "outbound": "direct" },
+      { "geoip": [ "lan", "cn" ], "outbound": "direct" }
     ]
   }
 }
