@@ -1,46 +1,23 @@
 {
   "dns": {
     "servers": [
-      { "tag": "dns_proxy", "address": "https://1.1.1.1/dns-query", "address_resolver": "dns_direct", "detour": "🚀 机场流量" },
-      { "tag": "dns_direct", "address": "223.5.5.5", "detour": "direct" },
-      { "tag": "dns_fakeip", "address": "fakeip" }
+      { "tag": "dns_proxy", "address": "https://1.1.1.1/dns-query", "detour": "🚀 机场流量" },
+      { "tag": "dns_direct", "address": "223.5.5.5", "detour": "direct" }
     ],
     "rules": [
       { "outbound": "any", "server": "dns_direct" },
-      { "clash_mode": "Global", "server": "dns_proxy" },
-      { "clash_mode": "Direct", "server": "dns_direct" },
-      { "geosite": [ "cn", "alibaba", "dingtalk" ], "server": "dns_direct" },
-      { "query_type": [ "A", "AAAA" ], "server": "dns_fakeip" }
+      { "geosite": ["cn", "alibaba", "dingtalk"], "server": "dns_direct" }
     ],
-    "fakeip": { "enabled": true, "inet4_range": "198.18.0.0/15" },
     "strategy": "ipv4_only"
   },
-  "inbounds": [
-    {
-      "type": "tun",
-      "inet4_address": "172.19.0.1/30",
-      "mtu": 9000,
-      "auto_route": true,
-      "strict_route": true,
-      "stack": "mixed",
-      "sniff": true,
-      "sniff_override_destination": true
-    }
-  ],
   "outbounds": [
-    // --- 流量入口策略组 ---
-    { "type": "selector", "tag": "🚀 机场流量", "providers": [ "airport-provider" ], "interrupt_exist_connections": true },
-    
-    // --- 业务分流策略组 (对应你之前的 Clash 逻辑) ---
-    { "type": "selector", "tag": "✨ AI助手", "outbounds": [ "🚀 机场流量", "direct" ] },
-    { "type": "selector", "tag": "📹 YouTube", "outbounds": [ "🚀 机场流量", "direct" ] },
-    { "type": "selector", "tag": "🎥 Netflix", "outbounds": [ "🚀 机场流量", "direct" ] },
-    { "type": "selector", "tag": "🎵 TikTok", "outbounds": [ "🚀 机场流量", "direct" ] },
-    { "type": "selector", "tag": "✈️ Telegram", "outbounds": [ "🚀 机场流量", "direct" ] },
-    { "type": "selector", "tag": "📺 Bilibili", "outbounds": [ "direct", "🚀 机场流量" ] },
-    { "type": "selector", "tag": "🛑 广告拦截", "outbounds": [ "block", "direct" ] },
-    
-    // --- 基础出站 ---
+    {
+      "type": "selector",
+      "tag": "🚀 机场流量",
+      "outbounds": ["direct"], 
+      "providers": [ "airport-provider" ]
+    },
+    { "type": "selector", "tag": "✨ AI助手", "outbounds": ["🚀 机场流量", "direct"] },
     { "type": "direct", "tag": "direct" },
     { "type": "dns", "tag": "dns-out" },
     { "type": "block", "tag": "block" }
@@ -49,27 +26,17 @@
     {
       "tag": "airport-provider",
       "type": "remote",
-      // !!! 重要：请在此处填入包含免流 Host 参数的转换链接 !!!
-      "download_url": "https://[你的订阅转换链接]&host=tms.dingtalk.com&sni=tms.dingtalk.com",
-      "path": "./airport_nodes.json",
-      "download_interval": "24h",
-      "health_check": { "enabled": true, "url": "http://www.gstatic.com/generate_204", "interval": "10m" }
+      "download_url": "https://你的订阅转换链接&host=tms.dingtalk.com&sni=tms.dingtalk.com",
+      "path": "./airport.json",
+      "download_interval": "24h"
     }
   ],
   "route": {
     "auto_detect_interface": true,
-    "final": "🚀 机场流量",
     "rules": [
       { "protocol": "dns", "outbound": "dns-out" },
-      { "geosite": "category-ads-all", "outbound": "block" },
       { "geosite": "openai", "outbound": "✨ AI助手" },
-      { "geosite": "youtube", "outbound": "📹 YouTube" },
-      { "geosite": "netflix", "outbound": "🎥 Netflix" },
-      { "geosite": "tiktok", "outbound": "🎵 TikTok" },
-      { "geosite": "telegram", "outbound": "✈️ Telegram" },
-      { "geosite": "bilibili", "outbound": "📺 Bilibili" },
-      { "geosite": "cn", "outbound": "direct" },
-      { "geoip": [ "lan", "cn" ], "outbound": "direct" }
+      { "geosite": "cn", "outbound": "direct" }
     ]
   }
 }
