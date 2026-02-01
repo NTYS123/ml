@@ -1,56 +1,75 @@
 {
-  "log": { "level": "info", "timestamp": true },
   "dns": {
     "servers": [
-      { "tag": "dns-ali", "address": "223.5.5.5", "detour": "DIRECT" },
-      { "tag": "dns-google", "address": "https://dns.google/dns-query", "detour": "🌌 国外免流" }
+      { "tag": "dns_proxy", "address": "https://1.1.1.1/dns-query", "address_resolver": "dns_direct", "detour": "🚀 机场流量" },
+      { "tag": "dns_direct", "address": "223.5.5.5", "detour": "direct" },
+      { "tag": "dns_fakeip", "address": "fakeip" }
     ],
     "rules": [
-      { "outbound": "any", "server": "dns-ali" },
-      { "rule_set": "geosite-cn", "server": "dns-ali" }
+      { "outbound": "any", "server": "dns_direct" },
+      { "clash_mode": "Global", "server": "dns_proxy" },
+      { "clash_mode": "Direct", "server": "dns_direct" },
+      { "geosite": [ "cn", "alibaba", "dingtalk" ], "server": "dns_direct" },
+      { "query_type": [ "A", "AAAA" ], "server": "dns_fakeip" }
     ],
-    "final": "dns-google",
-    "strategy": "ipv4_only",
-    "fakeip": { "enabled": true, "inet4_range": "198.18.0.0/15" }
+    "fakeip": { "enabled": true, "inet4_range": "198.18.0.0/15" },
+    "strategy": "ipv4_only"
   },
   "inbounds": [
-    { "type": "tun", "tag": "tun-in", "interface_name": "tun0", "auto_route": true, "strict_route": true, "stack": "system", "sniff": true, "sniff_override_destination": true }
+    {
+      "type": "tun",
+      "inet4_address": "172.19.0.1/30",
+      "mtu": 9000,
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed",
+      "sniff": true,
+      "sniff_override_destination": true
+    }
+  ],
+  "outbounds": [
+    // --- 流量入口策略组 ---
+    { "type": "selector", "tag": "🚀 机场流量", "providers": [ "airport-provider" ], "interrupt_exist_connections": true },
+    
+    // --- 业务分流策略组 (对应你之前的 Clash 逻辑) ---
+    { "type": "selector", "tag": "✨ AI助手", "outbounds": [ "🚀 机场流量", "direct" ] },
+    { "type": "selector", "tag": "📹 YouTube", "outbounds": [ "🚀 机场流量", "direct" ] },
+    { "type": "selector", "tag": "🎥 Netflix", "outbounds": [ "🚀 机场流量", "direct" ] },
+    { "type": "selector", "tag": "🎵 TikTok", "outbounds": [ "🚀 机场流量", "direct" ] },
+    { "type": "selector", "tag": "✈️ Telegram", "outbounds": [ "🚀 机场流量", "direct" ] },
+    { "type": "selector", "tag": "📺 Bilibili", "outbounds": [ "direct", "🚀 机场流量" ] },
+    { "type": "selector", "tag": "🛑 广告拦截", "outbounds": [ "block", "direct" ] },
+    
+    // --- 基础出站 ---
+    { "type": "direct", "tag": "direct" },
+    { "type": "dns", "tag": "dns-out" },
+    { "type": "block", "tag": "block" }
+  ],
+  "outbound_providers": [
+    {
+      "tag": "airport-provider",
+      "type": "remote",
+      // !!! 重要：请在此处填入包含免流 Host 参数的转换链接 !!!
+      "download_url": "https://[你的订阅转换链接]&host=tms.dingtalk.com&sni=tms.dingtalk.com",
+      "path": "./airport_nodes.json",
+      "download_interval": "24h",
+      "health_check": { "enabled": true, "url": "http://www.gstatic.com/generate_204", "interval": "10m" }
+    }
   ],
   "route": {
+    "auto_detect_interface": true,
+    "final": "🚀 机场流量",
     "rules": [
       { "protocol": "dns", "outbound": "dns-out" },
-      { "port": [443, 4430], "protocol": "udp", "outbound": "block" },
-      { "rule_set": "ads", "outbound": "🛑 广告拦截" },
-      { "rule_set": "youtube", "outbound": "📹 YouTube" },
-      { "rule_set": "cn", "outbound": "🇨🇳 国内流量" },
-      { "rule_set": "geolocation-!cn", "outbound": "🌍 国外流量" }
-    ],
-    "rule_set": [
-      { "tag": "geosite-cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs" },
-      { "tag": "ads", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs" },
-      { "tag": "youtube", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/youtube.srs" },
-      { "tag": "cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs" },
-      { "tag": "geolocation-!cn", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs" }
-    ],
-    "final": "🐟 漏网之鱼",
-    "auto_detect_interface": true
-  },
-  "outbounds": [
-    { "tag": "🇨🇳 国内流量", "type": "selector", "outbounds": ["🏮 国内免流", "DIRECT"] },
-    { "tag": "🌍 国外流量", "type": "selector", "outbounds": ["🌌 国外免流", "🔯 故障切换"] },
-    { "tag": "🏮 国内免流", "type": "selector", "outbounds": ["♻️ 国内自动", "🧧 国内手动"] },
-    { "tag": "🌌 国外免流", "type": "selector", "outbounds": ["♻️ 自动优选", "🗺️ 国外手动"] },
-    { "tag": "📹 YouTube", "type": "selector", "outbounds": ["🌌 国外免流"] },
-    { "tag": "🛑 广告拦截", "type": "selector", "outbounds": ["block", "DIRECT", "🏮 国内免流"] },
-    { "tag": "🐟 漏网之鱼", "type": "selector", "outbounds": ["🏮 国内免流", "🌌 国外免流", "DIRECT"] },
-    /* 核心修复：使用 <all-proxies> 让转换器自动填充节点，删除 filter 和多余空格 */
-    { "tag": "♻️ 自动优选", "type": "urltest", "outbounds": ["<all-proxies>"], "excludes": ["中国", "CN", "免流", "钉钉"], "url": "http://www.gstatic.com/generate_204" },
-    { "tag": "♻️ 国内自动", "type": "urltest", "outbounds": ["<all-proxies>"], "includes": ["中国", "CN", "免流", "钉钉"], "url": "http://www.gstatic.com/generate_204" },
-    { "tag": "🧧 国内手动", "type": "selector", "outbounds": ["<all-proxies>"], "includes": ["中国", "CN", "免流", "钉钉"] },
-    { "tag": "🗺️ 国外手动", "type": "selector", "outbounds": ["<all-proxies>"], "includes": ["香港", "日本", "美国", "HK", "JP", "US"] },
-    { "tag": "🔯 故障切换", "type": "urltest", "outbounds": ["<all-proxies>"], "excludes": ["中国", "CN"], "url": "http://www.gstatic.com/generate_204" },
-    { "tag": "DIRECT", "type": "direct" },
-    { "tag": "block", "type": "block" },
-    { "tag": "dns-out", "type": "dns" }
-  ]
+      { "geosite": "category-ads-all", "outbound": "block" },
+      { "geosite": "openai", "outbound": "✨ AI助手" },
+      { "geosite": "youtube", "outbound": "📹 YouTube" },
+      { "geosite": "netflix", "outbound": "🎥 Netflix" },
+      { "geosite": "tiktok", "outbound": "🎵 TikTok" },
+      { "geosite": "telegram", "outbound": "✈️ Telegram" },
+      { "geosite": "bilibili", "outbound": "📺 Bilibili" },
+      { "geosite": "cn", "outbound": "direct" },
+      { "geoip": [ "lan", "cn" ], "outbound": "direct" }
+    ]
+  }
 }
